@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WOŁANIE NA E2 LOOTLOG
 // @namespace    http://tampermonkey.net/
-// @version      3.3
+// @version      3.4
 // @description  DZIAŁA TYLKO NA NI
 // @author       Nolifequ
 // @icon         https://i.imgur.com/dmGpjfi.gif
@@ -100,51 +100,71 @@
 
         container.appendChild(lootlogInput);
 
-        const button = document.createElement('button');
-        button.innerHTML = '<img src="https://i.imgur.com/dmGpjfi.gif" alt="Nolifequ" style="width: 32px; height: 48px;">';
-        button.style.position = 'fixed';
-        button.style.padding = '5px';
-        button.style.backgroundColor = 'transparent';
-        button.style.border = 'none';
-        button.style.cursor = 'pointer';
-        button.style.zIndex = '10001';
+const button = document.createElement('button');
+button.innerHTML = '<img src="https://i.imgur.com/dmGpjfi.gif" alt="Nolifequ" style="width: 32px; height: 48px;">';
+button.style.position = 'fixed';
+button.style.padding = '5px';
+button.style.backgroundColor = 'transparent';
+button.style.border = 'none';
+button.style.cursor = 'pointer';
+button.style.zIndex = '10001';
 
-        const savedButtonPosition = JSON.parse(localStorage.getItem('buttonPosition') || '{"top": 10, "right": 10}');
-        button.style.top = savedButtonPosition.top + 'px';
-        button.style.right = savedButtonPosition.right + 'px';
+const savedButtonPosition = JSON.parse(localStorage.getItem('buttonPosition') || '{"top": 10, "right": 10}');
+button.style.top = savedButtonPosition.top + 'px';
+button.style.right = savedButtonPosition.right + 'px';
 
-        button.onmousedown = function(event) {
-            event.preventDefault();
-            let shiftX = event.clientX - button.getBoundingClientRect().left;
-            let shiftY = event.clientY - button.getBoundingClientRect().top;
+button.onmousedown = function(event) {
+    event.preventDefault();
+    let shiftX = event.clientX - button.getBoundingClientRect().left;
+    let shiftY = event.clientY - button.getBoundingClientRect().top;
 
-            function moveAt(pageX, pageY) {
-                button.style.left = pageX - shiftX + 'px';
-                button.style.top = pageY - shiftY + 'px';
-                button.style.right = 'auto';
-            }
+    function moveAt(pageX, pageY) {
+        let newLeft = pageX - shiftX;
+        let newTop = pageY - shiftY;
 
-            function onMouseMove(event) {
-                moveAt(event.pageX, event.pageY);
-            }
+        // Constrain within viewport
+        newLeft = Math.min(document.documentElement.clientWidth - button.offsetWidth, Math.max(0, newLeft));
+        newTop = Math.min(document.documentElement.clientHeight - button.offsetHeight, Math.max(0, newTop));
 
-            document.addEventListener('mousemove', onMouseMove);
+        button.style.left = newLeft + 'px';
+        button.style.top = newTop + 'px';
+        button.style.right = 'auto';
+    }
 
-            button.onmouseup = function() {
-                document.removeEventListener('mousemove', onMouseMove);
-                button.onmouseup = null;
+    function onMouseMove(event) {
+        moveAt(event.pageX, event.pageY);
+    }
 
-                const buttonPosition = {
-                    top: button.getBoundingClientRect().top,
-                    right: document.documentElement.clientWidth - button.getBoundingClientRect().right
-                };
-                localStorage.setItem('buttonPosition', JSON.stringify(buttonPosition));
-            };
+    document.addEventListener('mousemove', onMouseMove);
+
+    button.onmouseup = function() {
+        document.removeEventListener('mousemove', onMouseMove);
+        button.onmouseup = null;
+
+        const buttonPosition = {
+            top: button.getBoundingClientRect().top,
+            right: document.documentElement.clientWidth - button.getBoundingClientRect().right
         };
+        localStorage.setItem('buttonPosition', JSON.stringify(buttonPosition));
+    };
+};
 
-        button.ondragstart = function() {
-            return false;
-        };
+button.ondragstart = function() {
+    return false;
+};
+
+window.addEventListener('resize', function() {
+    let top = parseInt(button.style.top);
+    let right = parseInt(button.style.right);
+    if (top + button.offsetHeight > document.documentElement.clientHeight) {
+        button.style.top = (document.documentElement.clientHeight - button.offsetHeight) + 'px';
+    }
+    if (right + button.offsetWidth > document.documentElement.clientWidth) {
+        button.style.right = (document.documentElement.clientWidth - button.offsetWidth) + 'px';
+    }
+});
+
+document.body.appendChild(button);
 
         button.addEventListener('click', () => {
             container.style.display = container.style.display === 'none' ? 'block' : 'none';
