@@ -122,7 +122,6 @@ button.onmousedown = function(event) {
         let newLeft = pageX - shiftX;
         let newTop = pageY - shiftY;
 
-        // Constrain within viewport
         newLeft = Math.min(document.documentElement.clientWidth - button.offsetWidth, Math.max(0, newLeft));
         newTop = Math.min(document.documentElement.clientHeight - button.offsetHeight, Math.max(0, newTop));
 
