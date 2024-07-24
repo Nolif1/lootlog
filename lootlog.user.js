@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WOŁANIE NA E2 LOOTLOG
 // @namespace    http://tampermonkey.net/
-// @version      3.2
+// @version      3.3
 // @description  DZIAŁA TYLKO NA NI
 // @author       Nolifequ
 // @icon         https://i.imgur.com/dmGpjfi.gif
@@ -107,6 +107,7 @@
         button.style.backgroundColor = 'transparent';
         button.style.border = 'none';
         button.style.cursor = 'pointer';
+        button.style.zIndex = '10001';
 
         const savedButtonPosition = JSON.parse(localStorage.getItem('buttonPosition') || '{"top": 10, "right": 10}');
         button.style.top = savedButtonPosition.top + 'px';
