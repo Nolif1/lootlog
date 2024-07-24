@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WOŁANIE NA E2 LOOTLOG
 // @namespace    http://tampermonkey.net/
-// @version      3.1
+// @version      3.2
 // @description  DZIAŁA TYLKO NA NI
 // @author       Nolifequ
 // @icon         https://i.imgur.com/dmGpjfi.gif
@@ -21,7 +21,6 @@
         const element = document.querySelector(selector);
         if (element) {
             element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        } else {
         }
     }
 
@@ -30,7 +29,6 @@
         if (textarea) {
             textarea.value = text;
             textarea.dispatchEvent(new Event('input', { bubbles: true }));
-        } else {
         }
     }
 
@@ -53,9 +51,12 @@
             clickElement('#cll-message-send');
         }
     }
+
     function displayPopup(nick, npc, map) {
         const selectedNpcNames = JSON.parse(localStorage.getItem('selectedNpcNames') || '[]');
-        const lootlogName = localStorage.getItem('lootlogName') || 'MD II';
+        const customLootlogNames = JSON.parse(localStorage.getItem('customLootlogNames') || '{}');
+        const defaultLootlogName = localStorage.getItem('lootlogName') || 'MD II';
+        const lootlogName = customLootlogNames[npc.nick] || defaultLootlogName;
         if (selectedNpcNames.includes(npc.nick)) {
             messageText = messageTextTemplate + npc.nick;
             sendMessage(npc.nick, lootlogName);
@@ -365,7 +366,38 @@
             npcName.textContent = npc;
             label.appendChild(npcName);
 
+            const customLootlogNames = JSON.parse(localStorage.getItem('customLootlogNames') || '{}');
+            const npcCustomLootlogName = customLootlogNames[npc] || '';
+
+            const customLootlogLabel = document.createElement('span');
+            customLootlogLabel.style.position = 'absolute';
+            customLootlogLabel.style.top = '10px';
+            customLootlogLabel.style.right = '10px';
+            customLootlogLabel.style.fontSize = '10px';
+            customLootlogLabel.style.backgroundColor = '#fff';
+            customLootlogLabel.style.padding = '2px 4px';
+            customLootlogLabel.style.border = '1px solid #ccc';
+            customLootlogLabel.style.borderRadius = '4px';
+            customLootlogLabel.textContent = npcCustomLootlogName ? `${npcCustomLootlogName}` : '';
+
+            label.appendChild(customLootlogLabel);
+
             listContainer.appendChild(label);
+
+            label.addEventListener('contextmenu', (event) => {
+                event.preventDefault();
+                const customLootlogName = prompt(`Wprowadź nazwę lootloga dla ${npc}:`);
+                const customLootlogNames = JSON.parse(localStorage.getItem('customLootlogNames') || '{}');
+
+                if (customLootlogName) {
+                    customLootlogNames[npc] = customLootlogName;
+                } else {
+                    delete customLootlogNames[npc];
+                }
+
+                localStorage.setItem('customLootlogNames', JSON.stringify(customLootlogNames));
+                customLootlogLabel.textContent = customLootlogName ? `${customLootlogName}` : '';
+            });
         });
 
         container.appendChild(listContainer);
@@ -523,4 +555,3 @@
 'Furion',
 'Zorin'
 ]);
-
