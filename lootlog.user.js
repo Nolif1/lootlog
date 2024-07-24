@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WOŁANIE NA E2 LOOTLOG
 // @namespace    http://tampermonkey.net/
-// @version      3.5
+// @version      4.0
 // @description  DZIAŁA TYLKO NA NI
 // @author       Nolifequ
 // @icon         https://i.imgur.com/dmGpjfi.gif
@@ -437,8 +437,8 @@ const img = document.createElement('img');
                 img.src = npcImages[npc] || 'https://media.tenor.com/UX0MEq634O8AAAAj/shrek.gif';
                 img.alt = npc;
                 img.onload = function() {
-                    if (img.height > 64) {
-                        img.style.height = '64px';
+                    if (img.height > 90) {
+                        img.style.height = '90px';
                         img.style.width = 'auto';
                     }
                 };
@@ -447,8 +447,8 @@ const img = document.createElement('img');
 
         const npcName = document.createElement('span');
         npcName.style.position = 'absolute';
-        npcName.style.right = '10px';
-        npcName.style.bottom = '10px';
+        npcName.style.right = '8px';
+        npcName.style.bottom = '8px';
         npcName.textContent = npc;
         label.appendChild(npcName);
 
