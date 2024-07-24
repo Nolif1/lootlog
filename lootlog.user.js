@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WOŁANIE NA E2 LOOTLOG
 // @namespace    http://tampermonkey.net/
-// @version      3.4
+// @version      3.5
 // @description  DZIAŁA TYLKO NA NI
 // @author       Nolifequ
 // @icon         https://i.imgur.com/dmGpjfi.gif
@@ -63,6 +63,19 @@
         }
     }
 
+    function getInstalledLootlogs() {
+        const launchers = document.querySelectorAll('.cll-launcher');
+        const lootlogs = [];
+        launchers.forEach(launcher => {
+            const tip = launcher.getAttribute('data-tip');
+            const match = tip.match(/^(.*?) Lootlog/);
+            if (match && match[1]) {
+                lootlogs.push(match[1]);
+            }
+        });
+        return lootlogs;
+    }
+
     function createNpcSelector(npcList) {
         const container = document.createElement('div');
         container.style.position = 'fixed';
@@ -79,91 +92,99 @@
         container.style.width = '300px';
 
         const lootlogLabel = document.createElement('label');
-        lootlogLabel.innerText = 'Nazwa Lootloga (domyślnie MD II):';
+        lootlogLabel.innerText = 'Wybierz Lootlog domyślny:';
         lootlogLabel.style.display = 'block';
         lootlogLabel.style.marginBottom = '8px';
         lootlogLabel.style.fontWeight = 'bold';
         container.appendChild(lootlogLabel);
 
-        const lootlogInput = document.createElement('input');
-        lootlogInput.type = 'text';
-        lootlogInput.value = localStorage.getItem('lootlogName') || 'MD II';
-        lootlogInput.style.width = '94%';
-        lootlogInput.style.padding = '8px';
-        lootlogInput.style.border = '1px solid #ccc';
-        lootlogInput.style.borderRadius = '4px';
-        lootlogInput.style.marginBottom = '15px';
+        const lootlogSelect = document.createElement('select');
+        lootlogSelect.style.width = '100%';
+        lootlogSelect.style.padding = '8px';
+        lootlogSelect.style.border = '1px solid #ccc';
+        lootlogSelect.style.borderRadius = '4px';
+        lootlogSelect.style.marginBottom = '15px';
 
-        lootlogInput.addEventListener('input', function() {
-            localStorage.setItem('lootlogName', lootlogInput.value);
+        const installedLootlogs = getInstalledLootlogs();
+        installedLootlogs.forEach(lootlog => {
+            const option = document.createElement('option');
+            option.value = lootlog;
+            option.text = lootlog;
+            lootlogSelect.appendChild(option);
         });
 
-        container.appendChild(lootlogInput);
+        lootlogSelect.value = localStorage.getItem('lootlogName');
 
-const button = document.createElement('button');
-button.innerHTML = '<img src="https://i.imgur.com/dmGpjfi.gif" alt="Nolifequ" style="width: 32px; height: 48px;">';
-button.style.position = 'fixed';
-button.style.padding = '5px';
-button.style.backgroundColor = 'transparent';
-button.style.border = 'none';
-button.style.cursor = 'pointer';
-button.style.zIndex = '10001';
+        lootlogSelect.addEventListener('change', function() {
+            localStorage.setItem('lootlogName', lootlogSelect.value);
+        });
 
-const savedButtonPosition = JSON.parse(localStorage.getItem('buttonPosition') || '{"top": 10, "right": 10}');
-button.style.top = savedButtonPosition.top + 'px';
-button.style.right = savedButtonPosition.right + 'px';
+        container.appendChild(lootlogSelect);
 
-button.onmousedown = function(event) {
-    event.preventDefault();
-    let shiftX = event.clientX - button.getBoundingClientRect().left;
-    let shiftY = event.clientY - button.getBoundingClientRect().top;
+        const button = document.createElement('button');
+        button.innerHTML = '<img src="https://i.imgur.com/dmGpjfi.gif" alt="Nolifequ" style="width: 32px; height: 48px;">';
+        button.style.position = 'fixed';
+        button.style.padding = '5px';
+        button.style.backgroundColor = 'transparent';
+        button.style.border = 'none';
+        button.style.cursor = 'pointer';
+        button.style.zIndex = '10001';
 
-    function moveAt(pageX, pageY) {
-        let newLeft = pageX - shiftX;
-        let newTop = pageY - shiftY;
+        const savedButtonPosition = JSON.parse(localStorage.getItem('buttonPosition') || '{"top": 10, "right": 10}');
+        button.style.top = savedButtonPosition.top + 'px';
+        button.style.right = savedButtonPosition.right + 'px';
 
-        newLeft = Math.min(document.documentElement.clientWidth - button.offsetWidth, Math.max(0, newLeft));
-        newTop = Math.min(document.documentElement.clientHeight - button.offsetHeight, Math.max(0, newTop));
+        button.onmousedown = function(event) {
+            event.preventDefault();
+            let shiftX = event.clientX - button.getBoundingClientRect().left;
+            let shiftY = event.clientY - button.getBoundingClientRect().top;
 
-        button.style.left = newLeft + 'px';
-        button.style.top = newTop + 'px';
-        button.style.right = 'auto';
-    }
+            function moveAt(pageX, pageY) {
+                let newLeft = pageX - shiftX;
+                let newTop = pageY - shiftY;
 
-    function onMouseMove(event) {
-        moveAt(event.pageX, event.pageY);
-    }
+                newLeft = Math.min(document.documentElement.clientWidth - button.offsetWidth, Math.max(0, newLeft));
+                newTop = Math.min(document.documentElement.clientHeight - button.offsetHeight, Math.max(0, newTop));
 
-    document.addEventListener('mousemove', onMouseMove);
+                button.style.left = newLeft + 'px';
+                button.style.top = newTop + 'px';
+                button.style.right = 'auto';
+            }
 
-    button.onmouseup = function() {
-        document.removeEventListener('mousemove', onMouseMove);
-        button.onmouseup = null;
+            function onMouseMove(event) {
+                moveAt(event.pageX, event.pageY);
+            }
 
-        const buttonPosition = {
-            top: button.getBoundingClientRect().top,
-            right: document.documentElement.clientWidth - button.getBoundingClientRect().right
+            document.addEventListener('mousemove', onMouseMove);
+
+            button.onmouseup = function() {
+                document.removeEventListener('mousemove', onMouseMove);
+                button.onmouseup = null;
+
+                const buttonPosition = {
+                    top: button.getBoundingClientRect().top,
+                    right: document.documentElement.clientWidth - button.getBoundingClientRect().right
+                };
+                localStorage.setItem('buttonPosition', JSON.stringify(buttonPosition));
+            };
         };
-        localStorage.setItem('buttonPosition', JSON.stringify(buttonPosition));
-    };
-};
 
-button.ondragstart = function() {
-    return false;
-};
+        button.ondragstart = function() {
+            return false;
+        };
 
-window.addEventListener('resize', function() {
-    let top = parseInt(button.style.top);
-    let right = parseInt(button.style.right);
-    if (top + button.offsetHeight > document.documentElement.clientHeight) {
-        button.style.top = (document.documentElement.clientHeight - button.offsetHeight) + 'px';
-    }
-    if (right + button.offsetWidth > document.documentElement.clientWidth) {
-        button.style.right = (document.documentElement.clientWidth - button.offsetWidth) + 'px';
-    }
-});
+        window.addEventListener('resize', function() {
+            let top = parseInt(button.style.top);
+            let right = parseInt(button.style.right);
+            if (top + button.offsetHeight > document.documentElement.clientHeight) {
+                button.style.top = (document.documentElement.clientHeight - button.offsetHeight) + 'px';
+            }
+            if (right + button.offsetWidth > document.documentElement.clientWidth) {
+                button.style.right = (document.documentElement.clientWidth - button.offsetWidth) + 'px';
+            }
+        });
 
-document.body.appendChild(button);
+        document.body.appendChild(button);
 
         button.addEventListener('click', () => {
             container.style.display = container.style.display === 'none' ? 'block' : 'none';
@@ -273,7 +294,18 @@ document.body.appendChild(button);
     'Nymphemonia': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/nymphemonia.gif',
     'Artenius': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/wl-mrozu03.gif',
     'Furion': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/wl-mrozu02.gif',
-    'Zorin': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/wl-mrozu01.gif'
+    'Zorin': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/wl-mrozu01.gif',
+    'Dziewicza Orlica': 'https://micc.garmory-cdn.cloud/obrazki/npc/tyt/dziewicza_orlica.gif',
+    'Zabójczy Królik': 'https://micc.garmory-cdn.cloud/obrazki/npc/tyt/zabojczy_krolik.gif',
+    'Renegat Baulus': 'https://micc.garmory-cdn.cloud/obrazki/npc/tyt/renegat_baulus.gif',
+    'Piekielny Arcymag': 'https://micc.garmory-cdn.cloud/obrazki/npc/tyt/archdemon.gif',
+    'Versus Zoons': 'https://micc.garmory-cdn.cloud/obrazki/npc/tyt/titangoblin.gif',
+    'Łowczyni Wspomnień': 'https://micc.garmory-cdn.cloud/obrazki/npc/tyt/lowcz-wspo-driady.gif',
+    'Przyzywacz Demonów': 'https://micc.garmory-cdn.cloud/obrazki/npc/tyt/przyz_demon_sekta.gif',
+    'Maddok Magua': 'https://micc.garmory-cdn.cloud/obrazki/npc/tyt/maddok-tytan.gif',
+    'Tezcatlipoca': 'https://micc.garmory-cdn.cloud/obrazki/npc/tyt/tezcatlipoca.gif',
+    'Barbatos Smoczy Strażnik': 'https://micc.garmory-cdn.cloud/obrazki/npc/tyt/hebrehoth_smokoludzie.gif',
+    'Tanroth': 'https://micc.garmory-cdn.cloud/obrazki/npc/tyt/ice_king.gif',
         };
 
         const buttonContainer = document.createElement('div');
@@ -315,60 +347,95 @@ document.body.appendChild(button);
         buttonContainer.appendChild(deselectAllBtn);
         container.appendChild(buttonContainer);
 
-        npcList.forEach(npc => {
-            const label = document.createElement('label');
-            label.style.display = 'flex';
-            label.style.alignItems = 'center';
-            label.style.marginBottom = '8px';
-            label.style.padding = '8px';
-            label.style.border = '1px solid #ccc';
-            label.style.borderRadius = '4px';
-            label.style.backgroundColor = 'rgba(249, 249, 249, 0.8)';
-            label.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-            label.style.transition = 'background-color 0.3s ease';
-            label.style.position = 'relative';
+        const addNpcContainer = document.createElement('div');
+        addNpcContainer.style.marginBottom = '15px';
+        addNpcContainer.style.textAlign = 'center';
 
-            label.addEventListener('mouseover', () => {
-                label.style.backgroundColor = 'rgba(249, 249, 249, 1)';
-            });
+        const addNpcInput = document.createElement('input');
+        addNpcInput.type = 'text';
+        addNpcInput.placeholder = 'Dodaj własnego NPC';
+        addNpcInput.style.padding = '5px 10px';
+        addNpcInput.style.border = '1px solid #ccc';
+        addNpcInput.style.borderRadius = '4px';
+        addNpcInput.style.marginRight = '5px';
 
-            label.addEventListener('mouseout', () => {
-                label.style.backgroundColor = 'rgba(249, 249, 249, 0.8)';
-            });
-
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.value = npc;
-            checkbox.style.marginRight = '10px';
-            checkbox.style.transform = 'scale(1.2)';
-            checkbox.style.transition = 'transform 0.2s ease';
-
-            checkbox.addEventListener('change', function() {
-                const selectedOptions = Array.from(listContainer.querySelectorAll('input[type="checkbox"]:checked')).map(input => input.value);
-                localStorage.setItem('selectedNpcNames', JSON.stringify(selectedOptions));
-            });
-
-            checkbox.addEventListener('mouseover', () => {
-                checkbox.style.transform = 'scale(1.4)';
-            });
-
-            checkbox.addEventListener('mouseout', () => {
-                checkbox.style.transform = 'scale(1.2)';
-            });
-
-            const savedNpcNames = JSON.parse(localStorage.getItem('selectedNpcNames') || '[]');
-            if (savedNpcNames.includes(npc)) {
-                checkbox.checked = true;
+        const addNpcBtn = document.createElement('button');
+        addNpcBtn.textContent = 'Dodaj';
+        addNpcBtn.style.padding = '5px 10px';
+        addNpcBtn.style.border = 'none';
+        addNpcBtn.style.borderRadius = '4px';
+        addNpcBtn.style.backgroundColor = '#189a21';
+        addNpcBtn.style.color = 'white';
+        addNpcBtn.style.cursor = 'pointer';
+        addNpcBtn.style.fontWeight = 'bold';
+        addNpcBtn.addEventListener('click', () => {
+            const newNpc = addNpcInput.value.trim();
+            if (newNpc) {
+                npcList.push(newNpc);
+                localStorage.setItem('npcList', JSON.stringify(npcList));
+                renderNpcList();
+                addNpcInput.value = '';
             }
+        });
 
-            label.appendChild(checkbox);
+        addNpcContainer.appendChild(addNpcInput);
+        addNpcContainer.appendChild(addNpcBtn);
+        container.appendChild(addNpcContainer);
 
-            if (npcImages[npc]) {
-                const img = document.createElement('img');
-                img.src = npcImages[npc];
+function renderNpcList() {
+    listContainer.innerHTML = '';
+
+    npcList.forEach(npc => {
+        const label = document.createElement('label');
+        label.style.display = 'flex';
+        label.style.alignItems = 'center';
+        label.style.marginBottom = '8px';
+        label.style.padding = '8px';
+        label.style.border = '1px solid #ccc';
+        label.style.borderRadius = '4px';
+        label.style.backgroundColor = 'rgba(249, 249, 249, 0.8)';
+        label.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+        label.style.transition = 'background-color 0.3s ease';
+        label.style.position = 'relative';
+
+        label.addEventListener('mouseover', () => {
+            label.style.backgroundColor = 'rgba(249, 249, 249, 1)';
+        });
+
+        label.addEventListener('mouseout', () => {
+            label.style.backgroundColor = 'rgba(249, 249, 249, 0.8)';
+        });
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = npc;
+        checkbox.style.marginRight = '10px';
+        checkbox.style.transform = 'scale(1.2)';
+        checkbox.style.transition = 'transform 0.2s ease';
+
+        checkbox.addEventListener('change', function() {
+            const selectedOptions = Array.from(listContainer.querySelectorAll('input[type="checkbox"]:checked')).map(input => input.value);
+            localStorage.setItem('selectedNpcNames', JSON.stringify(selectedOptions));
+        });
+
+        checkbox.addEventListener('mouseover', () => {
+            checkbox.style.transform = 'scale(1.4)';
+        });
+
+        checkbox.addEventListener('mouseout', () => {
+            checkbox.style.transform = 'scale(1.2)';
+        });
+
+        const savedNpcNames = JSON.parse(localStorage.getItem('selectedNpcNames') || '[]');
+        if (savedNpcNames.includes(npc)) {
+            checkbox.checked = true;
+        }
+
+        label.appendChild(checkbox);
+
+const img = document.createElement('img');
+                img.src = npcImages[npc] || 'https://media.tenor.com/UX0MEq634O8AAAAj/shrek.gif';
                 img.alt = npc;
-                img.style.marginLeft = '10px';
-
                 img.onload = function() {
                     if (img.height > 64) {
                         img.style.height = '64px';
@@ -376,49 +443,75 @@ document.body.appendChild(button);
                     }
                 };
 
-                label.appendChild(img);
+        label.appendChild(img);
+
+        const npcName = document.createElement('span');
+        npcName.style.position = 'absolute';
+        npcName.style.right = '10px';
+        npcName.style.bottom = '10px';
+        npcName.textContent = npc;
+        label.appendChild(npcName);
+
+        const customLootlogNames = JSON.parse(localStorage.getItem('customLootlogNames') || '{}');
+        const npcCustomLootlogName = customLootlogNames[npc] || '';
+
+        const customLootlogLabel = document.createElement('span');
+        customLootlogLabel.style.position = 'absolute';
+        customLootlogLabel.style.top = '10px';
+        customLootlogLabel.style.right = '10px';
+        customLootlogLabel.style.fontSize = '10px';
+        customLootlogLabel.style.backgroundColor = '#fff';
+        customLootlogLabel.style.padding = '2px 4px';
+        customLootlogLabel.style.border = '1px solid #ccc';
+        customLootlogLabel.style.borderRadius = '4px';
+        customLootlogLabel.textContent = npcCustomLootlogName ? `${npcCustomLootlogName}` : '';
+
+        label.appendChild(customLootlogLabel);
+
+        if (!npcImages[npc]) {
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'X';
+            removeBtn.style.position = 'absolute';
+            removeBtn.style.left = '10px';
+            removeBtn.style.bottom = '10px';
+            removeBtn.style.border = 'none';
+            removeBtn.style.backgroundColor = 'red';
+            removeBtn.style.color = 'white';
+            removeBtn.style.cursor = 'pointer';
+            removeBtn.style.fontWeight = 'bold';
+            removeBtn.style.borderRadius = '4px';
+            removeBtn.addEventListener('click', () => {
+                npcList.splice(npcList.indexOf(npc), 1);
+                localStorage.setItem('npcList', JSON.stringify(npcList));
+
+                const selectedNpcNames = JSON.parse(localStorage.getItem('selectedNpcNames') || '[]');
+                const updatedSelectedNpcNames = selectedNpcNames.filter(name => name !== npc);
+                localStorage.setItem('selectedNpcNames', JSON.stringify(updatedSelectedNpcNames));
+
+                renderNpcList();
+            });
+
+            label.appendChild(removeBtn);
+        }
+
+        label.addEventListener('contextmenu', (event) => {
+            event.preventDefault();
+            const customLootlogName = prompt(`Wprowadź nazwę lootloga dla ${npc}:`);
+            const customLootlogNames = JSON.parse(localStorage.getItem('customLootlogNames') || '{}');
+
+            if (customLootlogName) {
+                customLootlogNames[npc] = customLootlogName;
+            } else {
+                delete customLootlogNames[npc];
             }
 
-            const npcName = document.createElement('span');
-            npcName.style.position = 'absolute';
-            npcName.style.right = '10px';
-            npcName.style.bottom = '10px';
-            npcName.textContent = npc;
-            label.appendChild(npcName);
-
-            const customLootlogNames = JSON.parse(localStorage.getItem('customLootlogNames') || '{}');
-            const npcCustomLootlogName = customLootlogNames[npc] || '';
-
-            const customLootlogLabel = document.createElement('span');
-            customLootlogLabel.style.position = 'absolute';
-            customLootlogLabel.style.top = '10px';
-            customLootlogLabel.style.right = '10px';
-            customLootlogLabel.style.fontSize = '10px';
-            customLootlogLabel.style.backgroundColor = '#fff';
-            customLootlogLabel.style.padding = '2px 4px';
-            customLootlogLabel.style.border = '1px solid #ccc';
-            customLootlogLabel.style.borderRadius = '4px';
-            customLootlogLabel.textContent = npcCustomLootlogName ? `${npcCustomLootlogName}` : '';
-
-            label.appendChild(customLootlogLabel);
-
-            listContainer.appendChild(label);
-
-            label.addEventListener('contextmenu', (event) => {
-                event.preventDefault();
-                const customLootlogName = prompt(`Wprowadź nazwę lootloga dla ${npc}:`);
-                const customLootlogNames = JSON.parse(localStorage.getItem('customLootlogNames') || '{}');
-
-                if (customLootlogName) {
-                    customLootlogNames[npc] = customLootlogName;
-                } else {
-                    delete customLootlogNames[npc];
-                }
-
-                localStorage.setItem('customLootlogNames', JSON.stringify(customLootlogNames));
-                customLootlogLabel.textContent = customLootlogName ? `${customLootlogName}` : '';
-            });
+            localStorage.setItem('customLootlogNames', JSON.stringify(customLootlogNames));
+            customLootlogLabel.textContent = customLootlogName ? `${customLootlogName}` : '';
         });
+
+        listContainer.appendChild(label);
+    });
+}
 
         container.appendChild(listContainer);
 
@@ -450,6 +543,8 @@ document.body.appendChild(button);
 
         container.style.display = 'none';
         document.body.appendChild(container);
+
+        renderNpcList();
     }
 
     function start() {
@@ -476,10 +571,34 @@ document.body.appendChild(button);
         }
     }
 
-    createNpcSelector(initialNpcList);
+    function updateLootlogOptions() {
+        const lootlogSelect = document.querySelector('select');
+        lootlogSelect.innerHTML = '';
 
-    window.addEventListener('load', start);
+        const defaultOption = document.createElement('option');
+        defaultOption.value = 'MD II';
+        defaultOption.text = 'MD II';
+        lootlogSelect.appendChild(defaultOption);
 
+        const installedLootlogs = getInstalledLootlogs();
+        installedLootlogs.forEach(lootlog => {
+            const option = document.createElement('option');
+            option.value = lootlog;
+            option.text = lootlog;
+            lootlogSelect.appendChild(option);
+        });
+
+        lootlogSelect.value = localStorage.getItem('lootlogName') || 'MD II';
+    }
+
+    window.addEventListener('load', () => {
+        const npcList = JSON.parse(localStorage.getItem('npcList')) || initialNpcList;
+        createNpcSelector(npcList);
+        updateLootlogOptions();
+        start();
+    });
+
+    window.addEventListener('DOMContentLoaded', updateLootlogOptions);
 })([
 'Mushita',
 'Kotołak Tropiciel',
@@ -573,5 +692,16 @@ document.body.appendChild(button);
 'Nymphemonia',
 'Artenius',
 'Furion',
-'Zorin'
+'Zorin',
+'Dziewicza Orlica',
+'Zabójczy Królik',
+'Renegat Baulus',
+'Piekielny Arcymag',
+'Versus Zoons',
+'Łowczyni Wspomnień',
+'Przyzywacz Demonów',
+'Maddok Magua',
+'Tezcatlipoca',
+'Barbatos Smoczy Strażnik',
+'Tanroth',
 ]);
