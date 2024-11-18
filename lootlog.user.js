@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WOŁANIE NA E2 LOOTLOG
 // @namespace    http://tampermonkey.net/
-// @version      4.0
+// @version      5.0
 // @description  DZIAŁA TYLKO NA NI
 // @author       Nolifequ
 // @icon         https://i.imgur.com/dmGpjfi.gif
