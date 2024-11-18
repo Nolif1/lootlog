@@ -248,6 +248,7 @@
     'Młody Jack Truciciel': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/pirat01.gif',
     'Helga Opiekunka Rumu': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/pirat-2b.gif',
     'Henry Kaprawe Oko': 'https://micc.garmory-cdn.cloud/obrazki/npc/e1/pirat5b.gif',
+    'XD': 'https://micc.garmory-cdn.cloud/obrazki/npc/e1/pirat5b.gif',
     'Eol': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/piaskowy_potwor-6a.gif',
     'Sheba Orcza Szamanka': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/r_orc_sheba.gif',
     'Grubber Ochlaj': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/grubber-ochlaj.gif',
