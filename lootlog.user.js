@@ -265,7 +265,6 @@
     'Fursharag Pożeracz Umysłów': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/praork_mag_elita.gif',
     'Ziuggrael Strażnik Królowej': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/praork_woj_elita.gif',
     'Lusgrathera Królowa Pramatka': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/prakrolowa.gif',
-    'Borgoros Garamir III': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/minotaur-elita.gif',
     'Chryzoprenia': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/chryzoprenia.gif',
     'Cerasus': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/drzewoe2.gif',
     'Czempion Furboli': 'https://micc.garmory-cdn.cloud/obrazki/npc/e2/forbol03.gif',
