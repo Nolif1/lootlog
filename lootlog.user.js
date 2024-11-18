@@ -650,6 +650,7 @@ const img = document.createElement('img');
 'Młody Jack Truciciel',
 'Helga Opiekunka Rumu',
 'Henry Kaprawe Oko',
+'XD',  
 'Eol',
 'Sheba Orcza Szamanka',
 'Grubber Ochlaj',
